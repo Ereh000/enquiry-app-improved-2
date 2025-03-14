@@ -1,0 +1,7 @@
+name = "enquiry-embed-postgras"
+
+type = "theme_app_extension"
+
+# Register the app embed block
+[app_embed_block]
+enabled_on_install = true

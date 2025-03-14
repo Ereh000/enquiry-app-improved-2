@@ -1,0 +1,119 @@
+<section class="enquiry-popup">
+  <!-- Main Content -->
+  <div class="main-content">
+    <button id="open-popup">Don't miss out!</button>
+  </div>
+
+  <!-- Popup Model -->
+  <div id="popup-model" class="popup-model">
+    <div class="popup-content">
+      <span class="close-btn">&times;</span>
+      <div class="form-container">
+        <div class="form-deteils">
+          <h2>Enquiry Form</h2>
+          <p style="">
+            Complete the form to sign up.
+          </p>
+        </div>
+        <form class="form enquire-form">
+          <input
+            type="text"
+            name="name"
+            placeholder="Name.."
+            required>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email.."
+            required>
+          <input
+            type="phone"
+            name="phone"
+            placeholder="Phone no...">
+          <input
+            type="text"
+            name="query"
+            placeholder="Customer Enquiry..."
+            required>
+          <button type="submit">Submit</button>
+        </form>
+      {% comment %} 
+                <p class="terms-text">
+                By signing up, you agree to receive marketing emails. View our privacy policy and terms of service for more
+                info. 
+                </p>
+            {% endcomment %}
+      </div>
+      <div class="image-container">
+        <img
+          src="https://cdn.shopify.com/s/files/1/0892/0209/8490/files/pexels-rickyrecap-1604141.jpg?v=1741944202"
+          width=""
+          height=""
+          alt="Cityscape">
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Enquiry Popup",
+    "target": "body",
+    "stylesheet": "main.css",
+
+// "javascript": "app.js",
+
+    "settings": []
+  }
+{% endschema %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const openPopupBtn = document.getElementById('open-popup');
+    const closeBtn = document.querySelector('.close-btn');
+    const popupModel = document.getElementById('popup-model');
+  
+    openPopupBtn.addEventListener('click', function () {
+      popupModel.style.display = 'flex';
+    });
+  
+    closeBtn.addEventListener('click', function () {
+      popupModel.style.display = 'none';
+    });
+  
+    // Close the popup if clicked outside
+    window.addEventListener('click', function (event) {
+      if (event.target === popupModel) {
+        popupModel.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+<script>
+  let userForm = document.querySelector('.form.enquire-form');
+  userForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(userForm);
+    const dataa = Object.fromEntries(formData.entries());
+    console.log(dataa);
+  
+    // Prepare data object
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone') || '',
+      query: formData.get('query'),
+    };
+  
+    // Send data to server
+    fetch('https://starlite-broke.myshopify.com/apps/enquiry-1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log('Response Data:', data))
+      .catch((error) => console.error('Error:', error));
+  });
+</script>
