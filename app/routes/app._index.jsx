@@ -1,4 +1,4 @@
-import { useLoaderData, json } from "@remix-run/react";
+import { json } from "@remix-run/node";
 import {
   Page,
   Card,
@@ -11,6 +11,7 @@ import {
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 import { useState } from "react";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 // Fetch data from Prisma
 export const loader = async ({ request }) => {
@@ -20,11 +21,44 @@ export const loader = async ({ request }) => {
     orderBy: { createdAt: "desc" },
   });
 
-  return json({ enquiries });
+
+  // Convert phone (BigInt) to string for each enquiry
+  const serializableEnquiries = enquiries.map((enquiry) => ({
+    ...enquiry,
+    phone: enquiry.phone.toString(),
+  }));
+
+  return json({ enquiries: serializableEnquiries });
+};
+
+// Handle delete action
+export const action = async ({ request }) => {
+  await authenticate.admin(request);
+
+  // const formData = await request.formData.name('id');
+  // const enquiryId = formData.get("id");
+
+  const formData = await request.formData();
+  const id = formData.get('id');
+
+  // if (!id) {
+  //   return json({ error: "Invalid request" }, { status: 400 });
+  // }
+
+  try {
+    await prisma.enquiry.delete({
+      where: { id: Number(id) },
+    });
+    return json({ success: true });
+  } catch (error) {
+    return json({ error: "Failed to delete enquiry" }, { status: 500 });
+  }
 };
 
 export default function Dashboard() {
   const { enquiries } = useLoaderData();
+  const fetcher = useFetcher(); // Fetcher to send delete requests
+
 
   const [activeModal, setActiveModal] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
@@ -35,16 +69,22 @@ export default function Dashboard() {
 
   // Handle row click
   const handleRowClick = (enquiry) => {
-    console.log("Row clicked:", enquiry); // ✅ DEBUGGING
     setSelectedEnquiry(enquiry);
     setActiveModal(true);
   };
 
   // Close modal
   const closeModal = () => {
-    console.log("Modal closed"); // ✅ DEBUGGING
     setActiveModal(false);
     setSelectedEnquiry(null);
+  };
+
+  // Handle delete
+  const handleDelete = (id) => {
+    fetcher.submit(
+      { id },
+      { method: "delete", action: "." } // Use the current route
+    );
   };
 
   return (
@@ -62,6 +102,7 @@ export default function Dashboard() {
             { title: "Phone" },
             { title: "Query" },
             { title: "Date" },
+            { title: "Actions" }, // Added Actions column
           ]}
         >
           {enquiries.map((enquiry, index) => (
@@ -82,6 +123,16 @@ export default function Dashboard() {
               </IndexTable.Cell>
               <IndexTable.Cell>
                 {new Date(enquiry.createdAt).toLocaleDateString()}
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Form method="post">
+                  <Button
+                    destructive
+                    onClick={() => handleDelete(enquiry.id)}
+                  >
+                    Delete
+                  </Button>
+                </Form>
               </IndexTable.Cell>
             </IndexTable.Row>
           ))}

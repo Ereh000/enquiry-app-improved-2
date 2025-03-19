@@ -1,7 +1,7 @@
 <section class="enquiry-popup">
   <!-- Main Content -->
   <div class="main-content">
-    <button id="open-popup">Don't miss out!</button>
+    <button id="open-popup">{{ block.settings.open_popup_text }}</button>
   </div>
 
   <!-- Popup Model -->
@@ -10,61 +10,124 @@
       <span class="close-btn">&times;</span>
       <div class="form-container">
         <div class="form-deteils">
-          <h2>Enquiry Form</h2>
-          <p style="">
-            Complete the form to sign up.
-          </p>
+          <h2>{{ block.settings.form_title }}</h2>
+          <p style="">{{ block.settings.form_subtitle }}</p>
         </div>
+        <p
+          id="eq_form_alert"
+          style="
+            background-color: #F8D7DA; color: #58151c; text-align: center;
+            font-size: 14px;
+            border-radius: 4px;
+            padding: 3px;
+            display: none;
+          "
+        >
+          All fields required
+        </p>
         <form class="form enquire-form">
           <input
             type="text"
             name="name"
-            placeholder="Name.."
-            required>
+            placeholder="Name"
+          >
           <input
             type="email"
             name="email"
-            placeholder="Email.."
-            required>
+            placeholder="Email"
+          >
           <input
             type="phone"
             name="phone"
-            placeholder="Phone no...">
-          <input
-            type="text"
+            placeholder="Phone no (max length 10)"
+            max="10"
+          >
+          <textarea
             name="query"
-            placeholder="Customer Enquiry..."
-            required>
-          <button type="submit">Submit</button>
+            rows="4"
+            cols="50"
+            placeholder="Your Query"
+            style="text-indent: 0;"
+          ></textarea>
+          <button
+            style="background-color: {{ block.settings.form_btn_bg }}; color: {{ block.settings.form_btn_text_color }} "
+            type="submit"
+          >
+            {{ block.settings.form_button_text }}
+          </button>
         </form>
-      {% comment %} 
-                <p class="terms-text">
-                By signing up, you agree to receive marketing emails. View our privacy policy and terms of service for more
-                info. 
-                </p>
-            {% endcomment %}
       </div>
       <div class="image-container">
-        <img
-          src="https://cdn.shopify.com/s/files/1/0892/0209/8490/files/pexels-rickyrecap-1604141.jpg?v=1741944202"
-          width=""
-          height=""
-          alt="Cityscape">
+        {% if block.settings.form_image != blank %}
+          <img
+            src="{{ block.settings.form_image | img_url: 'master' }}"
+            width=""
+            height=""
+            alt="Enquiry Form Image"
+          >
+        {% else %}
+          <img
+            src="https://webleyscott.in/cdn/shop/files/WP45231911.45Auto-5.webp?v=1740637776&width=823"
+            width=""
+            height=""
+            alt="Enquiry Form Image"
+          >
+        {% endif %}
       </div>
     </div>
   </div>
 </section>
 
 {% schema %}
-  {
-    "name": "Enquiry Popup",
-    "target": "body",
-    "stylesheet": "main.css",
-
-// "javascript": "app.js",
-
-    "settings": []
-  }
+{
+  "name": "Enquiry Popup",
+  "target": "body",
+  "stylesheet": "main.css",
+  // "javascript": "app.js",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "form_image",
+      "label": "Form Image"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form Title",
+      "default": "Interested on Webley Weapons?"
+    },
+    {
+      "type": "text",
+      "id": "form_subtitle",
+      "label": "Form Subtitle",
+      "default": "Fill out the below form, we will contact you."
+    },
+    {
+      "type": "text",
+      "id": "form_button_text",
+      "label": "Button Text",
+      "default": "Submit"
+    },
+    {
+      "type": "color",
+      "id": "form_btn_bg",
+      "label": "Button Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "form_btn_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "open_popup_text",
+      "label": "Open Popup Button Text",
+      "default": "Interested on Webley Weapons?"
+    }
+  ]
+}
 {% endschema %}
 
 <script>
@@ -72,15 +135,29 @@
     const openPopupBtn = document.getElementById('open-popup');
     const closeBtn = document.querySelector('.close-btn');
     const popupModel = document.getElementById('popup-model');
-  
+
+    // Define one day in milliseconds (24 hours)
+    const oneDay = 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    // Get the stored timestamp (if any)
+    const popupShownTime = localStorage.getItem('popupShownTime');
+
+    // If no timestamp exists or 24 hours have passed, show the popup and update the timestamp
+    if (!popupShownTime || now - popupShownTime > oneDay) {
+      setTimeout(function () {
+        popupModel.style.display = 'flex';
+        localStorage.setItem('popupShownTime', now.toString());
+      }, 3000); // 3000ms = 3 seconds delay
+    }
+
     openPopupBtn.addEventListener('click', function () {
       popupModel.style.display = 'flex';
     });
-  
+
     closeBtn.addEventListener('click', function () {
       popupModel.style.display = 'none';
     });
-  
+
     // Close the popup if clicked outside
     window.addEventListener('click', function (event) {
       if (event.target === popupModel) {
@@ -94,26 +171,66 @@
   let userForm = document.querySelector('.form.enquire-form');
   userForm.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    // Get a reference to the submit button
+    const submitBtn = userForm.querySelector('button[type="submit"]');
+    // Save original text to revert later
+    const originalText = submitBtn.innerHTML;
+
+    // Disable the button and set loading text (or add a spinner class)
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+    <svg style="height: 14px !important;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+      <circle fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" r="15" cx="40" cy="100"><animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" r="15" cx="100" cy="100"><animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" r="15" cx="160" cy="100"><animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle>
+    </svg>
+    `; // Or add a spinner element if you have one
+
     const formData = new FormData(userForm);
     const dataa = Object.fromEntries(formData.entries());
-    console.log(dataa);
-  
+    // console.log(dataa);
+
     // Prepare data object
     const data = {
       name: formData.get('name'),
       email: formData.get('email'),
-      phone: formData.get('phone') || '',
+      phone: formData.get('phone'),
       query: formData.get('query'),
     };
-  
+
     // Send data to server
-    fetch('https://starlite-broke.myshopify.com/apps/enquiry-1', {
+    fetch('{{ shop.url }}/apps/enquiry-1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
       .then((response) => response.json())
-      .then((data) => console.log('Response Data:', data))
-      .catch((error) => console.error('Error:', error));
+      .then((data) => {
+        console.log('Response Data:', data.message);
+        // console.log('Response Success:', data.success);
+        if (data.success == true) {
+          const alert = document.querySelector('#eq_form_alert');
+          alert.innerHTML = data.message;
+          alert.style.color = '#0a3622';
+          alert.style.backgroundColor = '#a3cfbb';
+          alert.style.display = 'block';
+          // Reset input fields
+          document.querySelectorAll('.form.enquire-form input').forEach((input) => {
+            input.value = '';
+          });
+          document.querySelectorAll('.form.enquire-form textarea').forEach((input) => {
+            input.value = '';
+          });
+        } else {
+          const alert = document.querySelector('#eq_form_alert');
+          alert.innerHTML = data.message;
+          alert.style.display = 'block';
+        }
+      })
+      .catch((error) => console.error('Error:', error))
+      .finally(() => {
+        // Re-enable the button and revert text when response is complete
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      });
   });
 </script>

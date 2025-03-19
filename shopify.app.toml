@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "3b4fb5c0e0fa3c64554af1731c0563ab"
-application_url = "https://ac-materials-bloomberg-liz.trycloudflare.com"
+client_id = "c87de35898fc377dbdec85a424caaa03"
+application_url = "https://curriculum-strength-introduced-ratio.trycloudflare.com"
 embedded = true
-name = "enquiry-app"
-handle = "enquiry-app"
+name = "enquery-app-webley"
+handle = "enquery-app-webley"
 
 [build]
 include_config_on_deploy = true
@@ -13,23 +13,15 @@ automatically_update_urls_on_dev = true
 [webhooks]
 api_version = "2025-01"
 
-  [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
-
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_customers,write_customers"
+scopes = "read_customers,write_customers,write_products"
 
 [auth]
 redirect_urls = [
-  "https://ac-materials-bloomberg-liz.trycloudflare.com/auth/callback",
-  "https://ac-materials-bloomberg-liz.trycloudflare.com/auth/shopify/callback",
-  "https://ac-materials-bloomberg-liz.trycloudflare.com/api/auth/callback"
+  "https://curriculum-strength-introduced-ratio.trycloudflare.com/auth/callback",
+  "https://curriculum-strength-introduced-ratio.trycloudflare.com/auth/shopify/callback",
+  "https://curriculum-strength-introduced-ratio.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

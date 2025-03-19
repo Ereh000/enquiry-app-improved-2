@@ -35,7 +35,7 @@ model Enquiry {
   id        Int      @id @default(autoincrement())
   name      String
   email     String
-  phone     Int
+  phone     BigInt
   query     String
   createdAt DateTime @default(now())
 }

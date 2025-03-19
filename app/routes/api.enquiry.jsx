@@ -22,11 +22,48 @@ export const action = async ({ request }) => {
 
       console.log("Received data:", { name, email, phone, query });
 
-      // Basic validation
-      if (!name || !email || !query) {
+      if (!name) {
+        // errors.name = "Name is required.";
         return json(
-          { success: false, message: "All fields are required" },
+          { success: false, message: "Name is required." },
           { status: 400 },
+        );
+      } else if (!/^[A-Za-z\s]+$/.test(name)) {
+        return json(
+          { success: false, message: "Name can only contain letters and spaces." },
+          { status: 400 },
+        );
+      }
+
+      if (!email) {
+        return json(
+          { success: false, message: "Email is required." },
+          { status: 400 },
+        );
+      } else if (!/\S+@\S+\.\S+/.test(email)) {
+        return json(
+          { success: false, message: "Invalid email format." },
+          { status: 400 },
+        );
+      }
+
+      if (!phone) {
+        return json(
+          { success: false, message: "Phone number is required." },
+          { status: 400 },
+        );
+      } else if (!/^\d{10}$/.test(phone)) {
+        return json(
+          { success: false, message: "Invalid phone number format. Must be 10 digits." },
+          { status: 400 },
+        );
+      }
+
+      // Basic validation
+      if (!query) {
+        return json(
+          { success: false, message: "Query is required" },
+          { status: 400 },  
         );
       }
 
@@ -44,8 +81,8 @@ export const action = async ({ request }) => {
 
       return json({
         success: true,
-        message: "Review submitted successfully!",
-        // review: newReview,
+        message: "Form submitted successfully!",
+        // review: newReview,  
       });
     } catch (error) {
       console.error("Error saving review:", error);
