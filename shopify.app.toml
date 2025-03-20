@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "c87de35898fc377dbdec85a424caaa03"
-application_url = "https://curriculum-strength-introduced-ratio.trycloudflare.com"
+client_id = "f7295b2910b626d328d3beb471938b0b"
+application_url = "https://november-oral-element-cakes.trycloudflare.com"
 embedded = true
-name = "enquery-app-webley"
-handle = "enquery-app-webley"
+name = "enquiry-improve-2"
+handle = "enquiry-improve-2"
 
 [build]
 include_config_on_deploy = true
@@ -19,9 +19,9 @@ scopes = "read_customers,write_customers,write_products"
 
 [auth]
 redirect_urls = [
-  "https://curriculum-strength-introduced-ratio.trycloudflare.com/auth/callback",
-  "https://curriculum-strength-introduced-ratio.trycloudflare.com/auth/shopify/callback",
-  "https://curriculum-strength-introduced-ratio.trycloudflare.com/api/auth/callback"
+  "https://november-oral-element-cakes.trycloudflare.com/auth/callback",
+  "https://november-oral-element-cakes.trycloudflare.com/auth/shopify/callback",
+  "https://november-oral-element-cakes.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

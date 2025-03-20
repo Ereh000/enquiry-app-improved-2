@@ -10,7 +10,7 @@ import {
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 // Fetch data from Prisma
@@ -63,6 +63,13 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure component only renders on client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Polaris IndexTable selection hook
   const { selectedResources, handleSelectionChange } =
     useIndexResourceState(enquiries);
@@ -90,53 +97,58 @@ export default function Dashboard() {
   return (
     <Page title="Enquiries Dashboard" subtitle="View all customer enquiries">
       <Card>
-        <IndexTable
-          resourceName={{ singular: "enquiry", plural: "enquiries" }}
-          itemCount={enquiries.length}
-          selectable={false}
-          selectedItemsCount={selectedResources.length}
-          onSelectionChange={handleSelectionChange}
-          headings={[
-            { title: "Name" },
-            { title: "Email" },
-            { title: "Phone" },
-            { title: "Query" },
-            { title: "Date" },
-            { title: "Actions" }, // Added Actions column
-          ]}
-        >
-          {enquiries.map((enquiry, index) => (
-            <IndexTable.Row
-              id={enquiry.id}
-              key={enquiry.id}
-              selected={selectedResources.includes(enquiry.id)}
-              position={index}
-              onClick={() => handleRowClick(enquiry)} // ✅ Handle click to open modal
-            >
-              <IndexTable.Cell>{enquiry.name}</IndexTable.Cell>
-              <IndexTable.Cell>{enquiry.email}</IndexTable.Cell>
-              <IndexTable.Cell>{enquiry.phone.toString()}</IndexTable.Cell>
-              <IndexTable.Cell>
-                {enquiry.query.length > 50
-                  ? `${enquiry.query.substring(0, 50)}...`
-                  : enquiry.query}
-              </IndexTable.Cell>
-              <IndexTable.Cell>
-                {new Date(enquiry.createdAt).toLocaleDateString()}
-              </IndexTable.Cell>
-              <IndexTable.Cell>
-                <Form method="post">
-                  <Button
-                    destructive
-                    onClick={() => handleDelete(enquiry.id)}
-                  >
-                    Delete
-                  </Button>
-                </Form>
-              </IndexTable.Cell>
-            </IndexTable.Row>
-          ))}
-        </IndexTable>
+
+        {isClient ? (
+          <IndexTable
+            resourceName={{ singular: "enquiry", plural: "enquiries" }}
+            itemCount={enquiries.length}
+            selectable={false}
+            selectedItemsCount={selectedResources.length}
+            onSelectionChange={handleSelectionChange}
+            headings={[
+              { title: "Name" },
+              { title: "Email" },
+              { title: "Phone" },
+              { title: "Query" },
+              { title: "Date" },
+              { title: "Actions" }, // Added Actions column
+            ]}
+          >
+            {enquiries.map((enquiry, index) => (
+              <IndexTable.Row
+                id={enquiry.id}
+                key={enquiry.id}
+                selected={selectedResources.includes(enquiry.id)}
+                position={index}
+                onClick={() => handleRowClick(enquiry)} // ✅ Handle click to open modal
+              >
+                <IndexTable.Cell>{enquiry.name}</IndexTable.Cell>
+                <IndexTable.Cell>{enquiry.email}</IndexTable.Cell>
+                <IndexTable.Cell>{enquiry.phone.toString()}</IndexTable.Cell>
+                <IndexTable.Cell>
+                  {enquiry.query.length > 50
+                    ? `${enquiry.query.substring(0, 50)}...`
+                    : enquiry.query}
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  {new Date(enquiry.createdAt).toLocaleDateString()}
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <Form method="post">
+                    <Button
+                      destructive
+                      onClick={() => handleDelete(enquiry.id)}
+                    >
+                      Delete
+                    </Button>
+                  </Form>
+                </IndexTable.Cell>
+              </IndexTable.Row>
+            ))}
+          </IndexTable>
+        ) : (
+          <Text variation="subdued">Loading...</Text>
+        )}
 
         {enquiries.length === 0 && (
           <Text variation="subdued">No enquiries found</Text>
