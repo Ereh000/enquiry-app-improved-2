@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "f7295b2910b626d328d3beb471938b0b"
-application_url = "https://november-oral-element-cakes.trycloudflare.com"
+client_id = "e8de89d32b3118eab89253460322d7e2"
+application_url = "https://mix-partnership-britannica-horses.trycloudflare.com"
 embedded = true
-name = "enquiry-improve-2"
-handle = "enquiry-improve-2"
+name = "enquiry-imporved-3"
+handle = "enquiry-imporved-3"
 
 [build]
 include_config_on_deploy = true
@@ -19,9 +19,9 @@ scopes = "read_customers,write_customers,write_products"
 
 [auth]
 redirect_urls = [
-  "https://november-oral-element-cakes.trycloudflare.com/auth/callback",
-  "https://november-oral-element-cakes.trycloudflare.com/auth/shopify/callback",
-  "https://november-oral-element-cakes.trycloudflare.com/api/auth/callback"
+  "https://mix-partnership-britannica-horses.trycloudflare.com/auth/callback",
+  "https://mix-partnership-britannica-horses.trycloudflare.com/auth/shopify/callback",
+  "https://mix-partnership-britannica-horses.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
