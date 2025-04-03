@@ -11,11 +11,14 @@ import {
   TextField,
   Select,
   LegacyCard,
+  RadioButton,
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server"; // Assuming this path
 import prisma from "../db.server"; // Assuming this path
 import { useEffect, useState } from "react";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+
+import * as XLSX from 'xlsx';
 
 // Loader function to fetch enquiries data from the database
 export const loader = async ({ request }) => {
@@ -85,7 +88,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // State for setting the number of items to display per page.  This is a constant.
-  const [itemsPerPage] = useState(25);
+  const [itemsPerPage] = useState(50);
 
   // State to track whether the component is mounted on the client-side.  This is
   // important for certain operations (like using browser APIs) that can only
@@ -199,9 +202,55 @@ export default function Dashboard() {
     return `${day}/${month}/${year}`;
   };
 
+  // Function to export the enquiries data to an Excel file.
+
+  const [exportModalActive, setExportModalActive] = useState(false);
+  const [exportOption, setExportOption] = useState("currentPage");
+  const exportToExcel = (option) => {
+    let dataToExport;
+    if (option === "currentPage") {
+      dataToExport = currentEnquiries;
+    } else if (option === "allData") {
+      dataToExport = enquiries; // Assuming `enquiries` contains all data
+    } else {
+      const today = new Date();
+      if (option === "today") {
+        dataToExport = enquiries.filter(enquiry => new Date(enquiry.createdAt).toDateString() === today.toDateString());
+      } else if (option === "last7Days") {
+        const last7Days = new Date(today);
+        last7Days.setDate(today.getDate() - 7);
+        dataToExport = enquiries.filter(enquiry => new Date(enquiry.createdAt) >= last7Days);
+      } else if (option === "last30Days") {
+        const last30Days = new Date(today);
+        last30Days.setDate(today.getDate() - 30);
+        dataToExport = enquiries.filter(enquiry => new Date(enquiry.createdAt) >= last30Days);
+      }
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport.map(enquiry => ({
+      Name: enquiry.name,
+      Email: enquiry.email,
+      Phone: enquiry.phone,
+      Query: enquiry.query,
+      Date: formatDate(enquiry.createdAt),
+    })));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Enquiries');
+    XLSX.writeFile(workbook, 'enquiries.xlsx');
+  };
+
   // Render the main dashboard UI.
   return (
-    <Page fullWidth title="Enquiries Dashboard" subtitle="View all customer enquiries">
+    <Page
+      primaryAction={{
+        content: 'Export',
+        onAction: () => setExportModalActive(true),
+      }}
+      fullWidth title="Enquiries Dashboard" subtitle="View all customer enquiries"
+    >
+
+      {/* <Button onClick={() => setExportModalActive(true)}>Export</Button> */}
+
 
       <div className="searchShortWrapper" style={{
         display: 'flex',
@@ -343,6 +392,52 @@ export default function Dashboard() {
             // Display a message if no enquiry is selected.
             <Text variation="subdued">No details available</Text>
           )}
+        </Modal.Section>
+      </Modal>
+
+      {/* Modal for exporting enquiries data. */}
+      <Modal
+        open={exportModalActive}
+        onClose={() => setExportModalActive(false)}
+        title="Export Options"
+        primaryAction={{
+          content: "Export",
+          onAction: () => {
+            exportToExcel(exportOption);
+            setExportModalActive(false);
+          },
+        }}
+      >
+        <Modal.Section>
+            <Text>Select export option:</Text>
+          <div className="" style={{
+            display: 'flex', flexDirection: 'column',}}>
+            <RadioButton
+              label="Current Page"
+              checked={exportOption === "currentPage"}
+              onChange={() => setExportOption("currentPage")}
+            />
+            <RadioButton
+              label="All Data"
+              checked={exportOption === "allData"}
+              onChange={() => setExportOption("allData")}
+            />
+            <RadioButton
+              label="Today"
+              checked={exportOption === "today"}
+              onChange={() => setExportOption("today")}
+            />
+            <RadioButton
+              label="Last 7 Days"
+              checked={exportOption === "last7Days"}
+              onChange={() => setExportOption("last7Days")}
+            />
+            <RadioButton
+              label="Last 30 Days"
+              checked={exportOption === "last30Days"}
+              onChange={() => setExportOption("last30Days")}
+            />
+          </div>
         </Modal.Section>
       </Modal>
     </Page >
