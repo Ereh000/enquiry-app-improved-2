@@ -206,6 +206,7 @@ export default function Dashboard() {
 
   const [exportModalActive, setExportModalActive] = useState(false);
   const [exportOption, setExportOption] = useState("currentPage");
+  
   const exportToExcel = (option) => {
     let dataToExport;
     if (option === "currentPage") {
